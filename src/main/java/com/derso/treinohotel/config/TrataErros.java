@@ -1,12 +1,13 @@
 package com.derso.treinohotel.config;
 
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import com.derso.treinohotel.quarto.NumeroQuartoDuplicadoException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -22,18 +23,24 @@ public class TrataErros {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErroDTO> maluco() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErroDTO(true, "Objeto inválido"));
-    }
+    public ResponseEntity<ErroDTO> falhaValidacao(MethodArgumentNotValidException e) {
+        String mensagens = e.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .map(ObjectError::getDefaultMessage)
+                .collect(Collectors.joining("; "));
 
-    @ExceptionHandler(NumeroQuartoDuplicadoException.class)
-    public ResponseEntity<String> handleNumeroDuplicado(NumeroQuartoDuplicadoException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErroDTO(true, mensagens));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleNotFound(EntityNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(HotelBusinessException.class)
+    public ResponseEntity<String> tratarExcecoesDeNegocio(HotelBusinessException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
 }

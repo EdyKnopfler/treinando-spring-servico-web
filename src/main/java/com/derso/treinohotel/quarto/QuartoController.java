@@ -5,19 +5,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/quartos")
+@RequiredArgsConstructor
 public class QuartoController {
 
     private final QuartoService service;
-
-    public QuartoController(QuartoService service) {
-        this.service = service;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

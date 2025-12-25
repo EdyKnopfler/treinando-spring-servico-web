@@ -1,6 +1,7 @@
 package com.derso.treinohotel.quarto;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,13 +11,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class QuartoService {
 
     private final QuartoRepository repository;
-
-    public QuartoService(QuartoRepository repository) {
-        this.repository = repository;
-    }
 
     @Transactional
     public QuartoDTO criar(QuartoDTO dados) {
