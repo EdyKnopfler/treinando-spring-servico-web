@@ -55,14 +55,19 @@ public class QuartoService {
     @Transactional
     public QuartoDTO atualizar(UUID id, QuartoDTO dados) {
         Optional<Quarto> quartoNoNumero = repository.findByNumero(dados.numero());
-        
-        quartoNoNumero.ifPresent(quarto -> {
+        Quarto quarto;
+
+        if (quartoNoNumero.isPresent()) {
+            quarto = quartoNoNumero.get();
+
             if (!quarto.getId().equals(id)) {
                 throw new NumeroQuartoDuplicadoException(dados.numero());
             }
-        });
-        
-        Quarto quarto = quartoNoNumero.orElseThrow(() -> new EntityNotFoundException("Quarto não encontrado"));
+        } else {
+            quarto = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Quarto não encontrado"));
+        }
+
         dados.applyTo(quarto);
         return QuartoDTO.fromEntity(quarto);
     }
