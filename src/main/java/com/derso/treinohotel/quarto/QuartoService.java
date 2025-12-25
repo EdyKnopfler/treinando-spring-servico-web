@@ -1,11 +1,12 @@
 package com.derso.treinohotel.quarto;
 
-
 import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -19,6 +20,10 @@ public class QuartoService {
 
     @Transactional
     public QuartoDTO criar(QuartoDTO dados) {
+        if (repository.existsByNumero(dados.numero())) {
+            throw new NumeroQuartoDuplicadoException(dados.numero());
+        }
+
         Quarto quarto = dados.toEntity();
         Quarto salvo = repository.save(quarto);
         return QuartoDTO.fromEntity(salvo);
@@ -39,14 +44,26 @@ public class QuartoService {
         return QuartoDTO.fromEntity(quarto);
     }
 
+    @Transactional(readOnly = true)
+    public QuartoDTO buscarPorNumero(int numero) {
+        return repository.findByNumero(numero)
+                .map(QuartoDTO::fromEntity)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Quarto " + numero + " não encontrado"));
+    }
+
     @Transactional
-    public QuartoDTO atualizar(UUID id, QuartoDTO dto) {
-        Quarto quarto = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Quarto não encontrado"));
-
-        // reaproveita o DTO para atualizar a entidade existente
-        dto.applyTo(quarto);
-
+    public QuartoDTO atualizar(UUID id, QuartoDTO dados) {
+        Optional<Quarto> quartoNoNumero = repository.findByNumero(dados.numero());
+        
+        quartoNoNumero.ifPresent(quarto -> {
+            if (!quarto.getId().equals(id)) {
+                throw new NumeroQuartoDuplicadoException(dados.numero());
+            }
+        });
+        
+        Quarto quarto = quartoNoNumero.orElseThrow(() -> new EntityNotFoundException("Quarto não encontrado"));
+        dados.applyTo(quarto);
         return QuartoDTO.fromEntity(quarto);
     }
 

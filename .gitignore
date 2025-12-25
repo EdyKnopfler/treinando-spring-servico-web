@@ -30,4 +30,4 @@ build/
 !**/src/test/**/build/
 
 ### Dev first database
-./hotel-db.*
+hotel-db.*

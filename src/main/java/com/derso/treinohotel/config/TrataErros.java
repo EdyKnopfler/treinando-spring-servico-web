@@ -6,6 +6,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.derso.treinohotel.quarto.NumeroQuartoDuplicadoException;
+
+import jakarta.persistence.EntityNotFoundException;
+
 @RestControllerAdvice
 public class TrataErros {
 
@@ -20,6 +24,16 @@ public class TrataErros {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroDTO> maluco() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErroDTO(true, "Objeto inválido"));
+    }
+
+    @ExceptionHandler(NumeroQuartoDuplicadoException.class)
+    public ResponseEntity<String> handleNumeroDuplicado(NumeroQuartoDuplicadoException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleNotFound(EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
 }

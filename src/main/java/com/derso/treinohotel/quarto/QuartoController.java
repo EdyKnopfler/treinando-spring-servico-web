@@ -1,6 +1,7 @@
 package com.derso.treinohotel.quarto;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -20,8 +21,8 @@ public class QuartoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public QuartoDTO criar(@RequestBody @Valid QuartoDTO request) {
-        return service.criar(request);
+    public ResponseEntity<QuartoDTO> criar(@RequestBody @Valid QuartoDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request));
     }
 
     @GetMapping
@@ -32,6 +33,11 @@ public class QuartoController {
     @GetMapping("/{id}")
     public QuartoDTO buscar(@PathVariable UUID id) {
         return service.buscarPorId(id);
+    }
+
+    @GetMapping("/numero/{numero}")
+    public QuartoDTO buscarPorNumero(@PathVariable int numero) {
+        return service.buscarPorNumero(numero);
     }
 
     @PutMapping("/{id}")
