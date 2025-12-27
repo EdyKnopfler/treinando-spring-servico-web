@@ -1,7 +1,6 @@
 package com.derso.treinohotel.quarto;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +20,8 @@ public class QuartoController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<QuartoDTO> criar(@RequestBody @Valid QuartoDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request));
+    public QuartoDTO criar(@RequestBody @Valid QuartoDTO request) {
+        return service.criar(request);
     }
 
     @GetMapping

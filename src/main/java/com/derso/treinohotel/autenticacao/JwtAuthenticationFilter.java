@@ -30,33 +30,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain chain
     ) throws ServletException, IOException {
-        try {
-            String header = request.getHeader("Authorization");
-    
-            if (header == null || !header.startsWith("Bearer ")) {
-                chain.doFilter(request, response);
-                return;
-            }
-    
-            String token = header.substring(7);
+        String header = request.getHeader("Authorization");
 
-            Optional<Claims> optClaims = jwtService.validateToken(token);
-    
-            if (optClaims.isEmpty()) {
-                chain.doFilter(request, response);
-                return;
-            }
-
-            Claims claims = optClaims.get();
-            String username = claims.get("email").toString();
-            List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + claims.get("userType").toString()));
-                
-            Authentication auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        if (header == null || !header.startsWith("Bearer ")) {
             chain.doFilter(request, response);
-        } finally {
-            SecurityContextHolder.clearContext();
+            return;
         }
+
+        String token = header.substring(7);
+
+        Optional<Claims> optClaims = jwtService.validateToken(token);
+
+        if (optClaims.isEmpty()) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        Claims claims = optClaims.get();
+        String username = claims.get("email").toString();
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + claims.get("userType").toString()));
+            
+        Authentication auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        chain.doFilter(request, response);
     }
 
     @Override
