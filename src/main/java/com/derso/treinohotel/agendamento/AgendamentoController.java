@@ -8,6 +8,7 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,18 +28,21 @@ public class AgendamentoController {
     private final AgendamentoService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('AGENDADOR')")
     public ResponseEntity<Void> criar(@Valid @RequestBody AgendamentoDTO dto) {
         UUID id = service.criar(dto);
         return ResponseEntity.created(URI.create("/agendamentos/" + id)).build();
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable UUID id) {
         service.excluir(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/ocupado")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('AGENDADOR')")
     public boolean quartoEstaOcupado(
         @RequestParam UUID quartoId,
         @RequestParam LocalDate inicio,
@@ -48,6 +52,7 @@ public class AgendamentoController {
     }
 
     @GetMapping("/periodo")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('AGENDADOR')")
     public List<AgendamentoDTO> listar(
         @RequestParam UUID quartoId,
         @RequestParam LocalDate inicio,
