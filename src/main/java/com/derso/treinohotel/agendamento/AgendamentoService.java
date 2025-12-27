@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.derso.treinohotel.config.HotelBusinessException;
 import com.derso.treinohotel.quarto.Quarto;
@@ -22,30 +23,33 @@ public class AgendamentoService {
     private final AgendamentoRepository agendamentoRepository;
     private final QuartoRepository quartoRepository;
 
+    @Transactional
     public UUID criar(AgendamentoDTO dados) {
-        Quarto quarto = quartoRepository.findById(dados.quartoId())
+        Quarto quarto = quartoRepository.findByIdForUpdate(dados.quartoId())
             .orElseThrow(() -> new EntityNotFoundException("Quarto não encontrado"));
 
         Agendamento novo = new Agendamento(quarto, dados.dataCheckin(), dados.dataCheckout());
 
-        boolean existeConflito = agendamentoRepository
+        boolean conflito = agendamentoRepository
             .existsByQuartoAndCheckinLessThanAndCheckoutGreaterThan(
                     quarto,
                     novo.getCheckout(),
                     novo.getCheckin()
             );
 
-        if (existeConflito) {
+        if (conflito) {
             throw new HotelBusinessException("Quarto já está reservado para o período informado");
         }
 
         return agendamentoRepository.save(novo).getId();
     }
 
+    @Transactional
     public void excluir(UUID id) {
         agendamentoRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<AgendamentoDTO> listarEntreDatas(UUID quartoId, LocalDate dataInicial, LocalDate dataFinal) {
         if (dataFinal.isBefore(dataInicial)) {
             throw new HotelBusinessException("Data final deve ser igual ou após a data inicial");
@@ -64,6 +68,7 @@ public class AgendamentoService {
             .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public boolean quartoEstaOcupado(UUID quartoId, LocalDate dataInicio, LocalDate dataFim) {
         if (!dataFim.isAfter(dataInicio)) {
             throw new HotelBusinessException("Data final deve ser após a inicial");
