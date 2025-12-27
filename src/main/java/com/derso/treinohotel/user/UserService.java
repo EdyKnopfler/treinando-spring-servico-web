@@ -17,24 +17,30 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Optional<UserDTO> createUser(String email, String password, String userType) {
-        if (!userRepository.findByEmail(email).isEmpty()) {
+    public UserDTO criar(UserDTO dadosUsuario) {
+        if (!userRepository.findByEmail(dadosUsuario.email()).isEmpty()) {
             throw new HotelBusinessException("E-mail já usado");
         }
 
-        return Optional.of(
+        return UserDTO.fromEntity(
             userRepository.save(
-                new User(UUID.randomUUID(), email, passwordEncoder.encode(password), userType)))
+                new User(
+                    UUID.randomUUID(), 
+                    dadosUsuario.email(), 
+                    passwordEncoder.encode(dadosUsuario.password()), 
+                    dadosUsuario.userType()
+                )
+            )
+        );
+    }
+
+    public Optional<UserDTO> validar(String email, String password) {
+        return userRepository.findByEmail(email)
+            .filter(user -> passwordEncoder.matches(password, user.getPassword()))
             .map(UserDTO::fromEntity);
     }
 
-    public boolean validateUser(String email, String password) {
-        return userRepository.findByEmail(email)
-            .map(user -> passwordEncoder.matches(password, user.getPassword()))
-            .orElse(false);
-    }
-
-    public Optional<UserDTO> findByEmail(String email) {
+    public Optional<UserDTO> porEmail(String email) {
         return userRepository.findByEmail(email).map(UserDTO::fromEntity);
     }
 

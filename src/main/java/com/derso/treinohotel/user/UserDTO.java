@@ -2,11 +2,13 @@ package com.derso.treinohotel.user;
 
 import java.util.UUID;
 
+import jakarta.validation.constraints.NotEmpty;
+
 public record UserDTO(
     UUID id,
-    String name,
-    String password,
-    String userType
+    @NotEmpty String email,
+    @NotEmpty String password,
+    @NotEmpty String userType
 ) {
 
     public static UserDTO fromEntity(User user) {
