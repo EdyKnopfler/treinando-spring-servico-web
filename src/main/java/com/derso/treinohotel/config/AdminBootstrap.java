@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.derso.treinohotel.user.UserDTO;
@@ -28,10 +29,15 @@ public class AdminBootstrap implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         if (userRepository.count() == 0) {
             UserDTO dadosUsuario = new UserDTO(UUID.randomUUID(), DEFAULT_EMAIL, DEFAULT_PASSWORD, "ADMIN");
-            userService.criar(dadosUsuario);
             System.out.println("TABELA DE USUÁRIOS VAZIA!");
-            System.out.println("Criado usuário " + dadosUsuario.email() + ", senha: " + dadosUsuario.password());
-            System.out.println("==> Use-o para criar seu primeiro usuário de produção e APAGUE-O!");
+            System.out.println("Criando usuário " + dadosUsuario.email() + ", senha: " + dadosUsuario.password());
+            
+            try {
+                userService.criar(dadosUsuario);
+                System.out.println("==> Use-o para criar seu primeiro usuário de produção e APAGUE-O!");
+            } catch (DataIntegrityViolationException e) {
+                System.out.println("==> Já criado por outra instância? " + e.getMessage());
+            }
         }
     }
     
