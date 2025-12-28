@@ -44,4 +44,8 @@ public class UserService {
         return userRepository.findByEmail(email).map(UserDTO::fromEntity);
     }
 
+    public void remover(UUID id) {
+        userRepository.deleteById(id);
+    }
+
 }
